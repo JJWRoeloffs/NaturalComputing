@@ -16,6 +16,7 @@ from __future__ import annotations
 import shutil
 import sys
 
+import numpy as np
 from nptyping import NDArray
 from beartype import beartype
 from beartype.typing import List, Callable
@@ -77,10 +78,10 @@ class GeneticAlgorithm:
             children = self.recombine(population)
             mutated_children = self.mutate(children)
             scores = self.evaluate(mutated_children, problem)
-            print(population, "\n\n", children, "\n\n", mutated_children, "\n\n", scores)
-            sys.exit(0)
-            population = self.select(children, scores)
+            population = self.select(children, scores, self.pop_size)
+            print(problem.state.current_best)
 
+        print("Total Evaluations: ", problem.state.evaluations, "\nEnd State: ", problem.state.current_best)
         return problem.state.current_best
 
     @beartype
@@ -89,13 +90,13 @@ class GeneticAlgorithm:
         return problem.state.evaluations < budget and not problem.state.optimum_found
 
     @beartype
-    def evaluate(self, population: NDArray, problem: ioh.problem.Integer) -> List[float]:
+    def evaluate(self, population: NDArray, problem: ioh.problem.Integer) -> NDArray:
         """Maps the problem on the population, returning a static list of scores"""
-        return [problem(individual) for individual in population]
+        return np.asarray([problem(individual) for individual in population])
 
 
 @beartype
-def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, instance=1):
+def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, type: str = "OneMax", instance=1):
     """A function to test if your implementation solves a OneMax problem.
 
     Parameters
@@ -109,7 +110,7 @@ def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, instance
     """
 
     budget = int(dimension * 5e3)
-    problem = ioh.get_problem("OneMax", instance, dimension, "Integer")
+    problem = ioh.get_problem(type, instance, dimension, "Integer")
     solution = genetic_algorithm(problem, budget)
 
     print("GA found solution:\n", solution)
@@ -137,7 +138,7 @@ def collect_data(genetic_algorithm: GeneticAlgorithm, dimension: int, nreps: int
         The number of repetitions for each problem instance.
     """
 
-    budget = int(dimension * 5e3)
+    budget = int(dimension * 5e2)
     suite = ioh.suite.PBO([1, 2], list(range(1, 11)), [dimension])
     logger = ioh.logger.Analyzer(algorithm_name="GeneticAlgorithm")
     suite.attach_logger(logger)
@@ -158,30 +159,34 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
     """Return a new genetic algorithem with the given amount of dimensions.
     Parameters of the algorithm can be set by writing code in this funcion"""
 
-    def test():
-        pass
-    from algorithms import PointCrossover, BitflipMutation
+    from algorithms import PointCrossover, BitflipMutation, TournamentSelection
 
     recombination_algorithm = PointCrossover(
-        offspring_rate=2.0
+        offspring_rate=1.7,
+        amount_of_splits=40,
+        amount_of_parents=4
     )
     mutation_algorithm = BitflipMutation(
-        rate=0.05
+        rate=0.01
+    )
+    selection_algorithm = TournamentSelection(
+        remove_chosen=True
     )
 
     return GeneticAlgorithm(
-            pop_size = 2,
+            pop_size = 200,
             recombination_algorithm = recombination_algorithm,
             mutation_algorithm = mutation_algorithm,
-            selection_algorithm = test
+            selection_algorithm = selection_algorithm
     )
 
 if __name__ == "__main__":
     # Simple test for development purpose
-    test_algorithm(new_genetic_algorithm(), 10)
+    # test_algorithm(new_genetic_algorithm(), 10)
 
     # Test required for A1, your GA should be able to pass this!
-    # test_algorithm(new_genetic_algorithm(), 100)
+    test_algorithm(new_genetic_algorithm(), 100)
+    #test_algorithm(new_genetic_algorithm(), 100, type="LeadingOnes")
 
     # If your implementation passes test_algorithm(new_genetic_algorithm(), 100)
-    collect_data(new_genetic_algorithm(), 100)
+    #collect_data(new_genetic_algorithm(), 100)
