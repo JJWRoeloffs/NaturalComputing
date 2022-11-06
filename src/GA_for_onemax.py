@@ -160,16 +160,19 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
 
     def test():
         pass
-    from algorithms import PointCrossover
+    from algorithms import PointCrossover, BitflipMutation
 
     recombination_algorithm = PointCrossover(
         offspring_rate=2.0
+    )
+    mutation_algorithm = BitflipMutation(
+        rate=0.05
     )
 
     return GeneticAlgorithm(
             pop_size = 2,
             recombination_algorithm = recombination_algorithm,
-            mutation_algorithm = test,
+            mutation_algorithm = mutation_algorithm,
             selection_algorithm = test
     )
 
