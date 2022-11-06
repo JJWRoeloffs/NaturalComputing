@@ -20,6 +20,7 @@ import math
 
 import numpy as np
 from beartype import beartype
+from beartype.typing import List, Callable
 
 import ioh
 
@@ -58,29 +59,36 @@ class Selection:
 class GeneticAlgorithm:
     """An implementation of the Genetic Algorithm."""
 
+    @beartype
     def __init__(
             self,
-            budget: int,
-            pop_size: int = 20,
+            pop_size: int,
+            recombination_algorithm: Callable,
+            mutation_algorithm: Callable,
+            selection_algorithm: Callable
     ) -> None:
         """Construct a new GA object.
 
         Parameters
         ----------
-        budget: int
-            The maximum number objective function evaluations
-            the GA is allowed to do when solving a problem.
-
-        Notes
-        -----
-        *   You can add more parameters to this constructor, which are specific to
-            the GA or one of the (to be implemented) operators, such as a mutation rate.
+        pop_size: int
+            The population size to use.
+        recombination_algorithm: Callable
+            The recombination algorithm to use
+        mutation_algorithm: Callable
+            The mutation algorithm to use
+        selection-algorithm: Callable
+            The selection algorithm to use
         """
 
-        self.budget = budget
         self.pop_size = pop_size
 
-    def __call__(self, problem: ioh.problem.Integer) -> ioh.IntegerSolution:
+        self.recombine = recombination_algorithm
+        self.mutate = mutation_algorithm
+        self.select = selection_algorithm
+
+    @beartype
+    def __call__(self, problem: ioh.problem.Integer, budget: int) -> ioh.IntegerSolution:
         """Run the GA on a given problem instance.
 
         Parameters
@@ -88,17 +96,8 @@ class GeneticAlgorithm:
         problem: ioh.problem.Integer
             An integer problem, from the ioh package. This version of the GA
             should only work on binary/discrete search spaces.
-
-        Notes
-        -----
-        *   This is the main body of you GA. You should implement all the logic
-            for this search algorithm in this method. This does not mean that all
-            the code needs to be in this method as one big block of code, you can
-            use different methods you implement yourself.
-
-        *   For now there is a random search process implemented here, which
-            is a placeholder, and just to show you how to call the problem
-            class.
+        budget: int
+            The amount of times the GA is allowed to call the problem 
         """
 
         population = generate_rand_population(
@@ -106,18 +105,27 @@ class GeneticAlgorithm:
                 dimensions=problem.meta_data.n_variables
             )
 
-        while self.should_continue(problem):
-            print(population)
-            sys.exit(0)
-            pass
+        while self.should_continue(problem, budget):
+            children = self.recombine(population)
+            mutated_children = self.mutate(children)
+            scores = self.evaluate(mutated_children, problem)
+            population = self.select(children, scores)
 
         return problem.state.current_best
 
-    def should_continue(self, problem: ioh.problem.Integer) -> bool:
-        return problem.state.evaluations < self.budget and not problem.state.optimum_found
+    @beartype
+    def should_continue(self, problem: ioh.problem.Integer, budget: int) -> bool:
+        """Returns whether the algorithm should continue one more generation or not"""
+        return problem.state.evaluations < budget and not problem.state.optimum_found
+
+    @beartype
+    def evaluate(self, population: NDArray, problem: ioh.problem.Integer) -> List[float]:
+        """Maps the problem on the population, returning a static list of scores"""
+        return [problem(individual) for individual in population]
 
 
-def test_algorithm(dimension, instance=1):
+@beartype
+def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, instance=1):
     """A function to test if your implementation solves a OneMax problem.
 
     Parameters
@@ -132,21 +140,20 @@ def test_algorithm(dimension, instance=1):
 
     budget = int(dimension * 5e3)
     problem = ioh.get_problem("OneMax", instance, dimension, "Integer")
-    ga = GeneticAlgorithm(budget)
-    solution = ga(problem)
+    solution = genetic_algorithm(problem, budget)
 
     print("GA found solution:\n", solution)
 
     assert problem.state.optimum_found, "The optimum has not been reached."
-    assert problem.state.evaluations >= budget, (
+    assert problem.state.evaluations <= budget, (
         "The GA has spent more than the allowed number of evaluations to "
         "reach the optimum."
     )
 
     print(f"OneMax was successfully solved in {dimension}D.\n")
 
-
-def collect_data(dimension: int = 100, nreps: int = 5):
+@beartype
+def collect_data(genetic_algorithm: GeneticAlgorithm, dimension: int, nreps: int = 5):
     """OneMax + LeadingOnes functions 10 instances.
 
     This function should be used to generate data, for A1.
@@ -160,7 +167,7 @@ def collect_data(dimension: int = 100, nreps: int = 5):
         The number of repetitions for each problem instance.
     """
 
-    budget = int(dimension * 5e2)
+    budget = int(dimension * 5e3)
     suite = ioh.suite.PBO([1, 2], list(range(1, 11)), [dimension])
     logger = ioh.logger.Analyzer(algorithm_name="GeneticAlgorithm")
     suite.attach_logger(logger)
@@ -169,21 +176,35 @@ def collect_data(dimension: int = 100, nreps: int = 5):
         print("Solving: ", problem)
 
         for _ in range(nreps):
-            ga = GeneticAlgorithm(budget)
-            ga(problem)
+            genetic_algorithm(problem, budget)
             problem.reset()
     logger.close()
 
     shutil.make_archive("ioh_data", "zip", "ioh_data")
     shutil.rmtree("ioh_data")
 
+@beartype
+def new_genetic_algorithm() -> GeneticAlgorithm:
+    """Return a new genetic algorithem with the given amount of dimensions.
+    Parameters of the algorithm can be set by writing code in this funcion"""
+
+    def test():
+        pass
+
+    return GeneticAlgorithm(
+            pop_size = 20,
+            recombination_algorithm = test,
+            mutation_algorithm = test,
+            selection_algorithm = test
+    )
 
 if __name__ == "__main__":
     # Simple test for development purpose
-    test_algorithm(10)
+    test_algorithm(new_genetic_algorithm(), 10)
 
     # Test required for A1, your GA should be able to pass this!
-    # test_algorithm(100)
+    # test_algorithm(new_genetic_algorithm(), 100)
 
-    # If your implementation passes test_algorithm(100)
-    collect_data(100)
+    # If your implementation passes test_algorithm(new_genetic_algorithm(), 100)
+    collect_data(new_genetic_algorithm(), 100)
+
