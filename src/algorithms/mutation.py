@@ -10,7 +10,7 @@ class BitflipMutation:
     @beartype
     def __init__(self, rate: float) -> None:
         """A uniform mutation algorithm
-        
+
         ---
         Parameters:
         rate: float [0:1]
@@ -21,12 +21,12 @@ class BitflipMutation:
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
         """Uniform mutation algorithm on population
-        
+
         ---
         Parameters:
         population: NDArray
             Array representing the population
-            
+
         ---
         Returns:
         NDArray representing the offspring

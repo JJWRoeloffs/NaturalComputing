@@ -78,19 +78,37 @@ class GeneticAlgorithm:
             mutated_children = self.mutate(children)
             scores = self.evaluate(mutated_children, problem)
             population = self.select(children, scores, self.pop_size)
-            print(problem.state.current_best)
 
-        print("Total Evaluations: ", problem.state.evaluations, "\nEnd State: ", problem.state.current_best)
         return problem.state.current_best
 
     @beartype
     def should_continue(self, problem: ioh.problem.Integer, budget: int) -> bool:
-        """Returns whether the algorithm should continue one more generation or not"""
+        """Whether the algorithm should continue one more generation or not
+
+        ---
+        Parameters:
+        problem: ioh.problem.Integer
+            The problem to evaluate
+        budget: int
+            The budget for the problem
+        """
         return problem.state.evaluations < budget and not problem.state.optimum_found
 
     @beartype
     def evaluate(self, population: NDArray, problem: ioh.problem.Integer) -> NDArray:
-        """Maps the problem on the population, returning a static list of scores"""
+        """Maps the problem on the population, returning a static list of scores
+
+        ---
+        Parameters:
+        population: NDArray
+            The population to evaluate
+        problem: ioh.problem.Integer
+            The problem to evaluate the population on
+
+        ---
+        Returns:
+        NDArray of the scores of each individual, alligned by index
+        """
         return np.asarray([problem(individual) for individual in population])
 
 
@@ -183,9 +201,9 @@ if __name__ == "__main__":
     # Simple test for development purpose
     # test_algorithm(new_genetic_algorithm(), 10)
 
-    # Test required for A1, your GA should be able to pass this!
-    test_algorithm(new_genetic_algorithm(), 100)
-    #test_algorithm(new_genetic_algorithm(), 100, type="LeadingOnes")
+    # Large tests
+    # test_algorithm(new_genetic_algorithm(), 100)
+    # test_algorithm(new_genetic_algorithm(), 100, type="LeadingOnes")
 
     # If your implementation passes test_algorithm(new_genetic_algorithm(), 100)
-    #collect_data(new_genetic_algorithm(), 100)
+    collect_data(new_genetic_algorithm(), 100)

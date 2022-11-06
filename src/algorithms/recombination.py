@@ -14,12 +14,43 @@ class Swap:
     @beartype
     @staticmethod
     def random(part: NDArray, i: int = 0) -> NDArray:
+        """Random Swap funcion
+        This function can be used in the crossover algorithms to swap parts' places
+        It returns the parts in random order
+
+        ---
+        Parameters:
+        part: NDArray
+            Numpy array representing the part
+        i: int
+            Index at which the part is (not used by this function)
+
+        ---
+        Returns:
+        NDArray representing the new swapped parts.
+        """
         return np.random.permutation(part)
 
     @beartype
     @staticmethod
     def roll(part: NDArray, i: int = 0) -> NDArray:
-        return part if i % 2 else np.roll(part, 1, axis=0)
+        """Rolling Swap funcion
+        This function can be used in the crossover algorithms to swap parts' places
+        It returns the parts in rolled order, based on the provided index
+            Example: at i=1 [1,2,3,4] would roll to [4,1,2,3]
+
+        ---
+        Parameters:
+        part: NDArray
+            Numpy array representing the part
+        i: int
+            Index at which the part is
+
+        ---
+        Returns:
+        NDArray representing the new swapped parts.
+        """
+        return np.roll(part, i, axis=0)
 
 
 class UniformCrossover:
@@ -32,7 +63,7 @@ class UniformCrossover:
             swap_function: Callable = Swap.roll
         ) -> None:
         """A uniform recombination algorithm
-        
+
         ---
         Parameters:
         amount_of_parents: int
@@ -47,18 +78,18 @@ class UniformCrossover:
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
         """Uniform recombination algorithm on population
-        
+
         ---
         Parameters:
         population: NDArray
             Array representing the population
-            
+
         ---
         Returns:
         NDArray representing the offspring
         """
         amount_of_groups = math.ceil((population.shape[0]/self.amount_of_parents)*self.offspring_rate)
-        
+
         if population.shape[0] > amount_of_groups*self.amount_of_parents:
             raise ValueError("Effective reproduction rate should be at least 1")
 
@@ -77,13 +108,45 @@ class UniformCrossover:
         amount_of_groups: int,
         amount_per_group: int
     ) -> Iterator[NDArray]:
+        """Get uniformly-crossed-over children from population
+
+        ---
+        Parameters:
+        population: NDArray
+            Numpy array representing the population to make children from
+        amount_of_groups: int
+            The amount of child groups to make
+        amount_per_group: int
+            The amount of individuals (parents & children) per crossed-over group
+
+        ---
+        Returns:
+        Itterator over the generated child groups
+        """
         for _ in range(amount_of_groups):
             parents = take_random_individual(population, amount=amount_per_group)
             chances = np.random.rand(parents.shape[1])
             yield self._get_uniform_child_group(parents=parents, chances=chances)
-    
+
     @beartype
     def _get_uniform_child_group(self, *, parents: NDArray, chances: NDArray) -> NDArray:
+        """Get Uniformly-crossed-over child group from population
+        Each part will be swapped/randomised according to self.swap
+        NOTE: This algorithm is slow, and can do with improving
+
+        ---
+        Parameters:
+        chances: NDArray
+            Numpy array representing the changes for each index to swap over
+        parents: NDArray
+            Numpy array representing the parent group to return the parts from
+        self.swap: Callable
+            The function to swap the parts with (From the Swap class)
+
+        ---
+        Returns:
+        NDArray representing the new child group
+        """
         child_group = np.copy(parents)
         for i in range(parents.shape[1]): #Inefficient: There should be a way without looping over the dimensions in python.
             if chances[i] < 0.5:
@@ -102,7 +165,7 @@ class PointCrossover:
             swap_function: Callable = Swap.roll
         ) -> None:
         """A uniform recombination algorithm
-        
+
         ---
         Parameters:
         amount_of_parents: int
@@ -122,12 +185,12 @@ class PointCrossover:
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
         """Point recombination algorithm on population
-        
+
         ---
         Parameters:
         population: NDArray
             Array representing the population
-            
+
         ---
         Returns:
         NDArray representing the offspring
@@ -152,7 +215,22 @@ class PointCrossover:
         population: NDArray,
         amount_of_groups: int,
         amount_per_group: int,
-    ) -> Iterator[NDArray]:
+        ) -> Iterator[NDArray]:
+        """Get point-crossed-over children from population
+
+        ---
+        Parameters:
+        population: NDArray
+            Numpy array representing the population to make children from
+        amount_of_groups: int
+            The amount of child groups to make
+        amount_per_group: int
+            The amount of individuals (parents & children) per crossed-over group
+
+        ---
+        Returns:
+        Itterator over the generated child groups
+        """
         for _ in range(amount_of_groups):
             parents = take_random_individual(population, amount=amount_per_group)
             splits = self._get_random_ranges(dimensions = parents.shape[1])
@@ -162,7 +240,7 @@ class PointCrossover:
     @beartype
     def _get_random_ranges(self, *, dimensions: int) -> List[int]:
         """Get a list of integers representing the ranges for splitting an individual
-        
+
         ---
         Parameters:
         dimensions: int
@@ -180,6 +258,22 @@ class PointCrossover:
 
     @beartype
     def _get_split_parts(self, splits: List[int], parents: NDArray) -> Iterator[NDArray]:
+        """Get Itterator over parts, representing the individual sections from a group of parents
+        Each part will be swapped/randomised according to self.swap
+
+        ---
+        Parameters:
+        splits: List[int]
+            List representing the splits that need to be done (formatted as ._get_random_ranges)
+        parents: NDArray
+            Numpy array representing the parent group to return the parts from
+        self.swap: Callable
+            The function to swap the parts with (From the Swap class)
+
+        ---
+        Returns:
+        Itterator over the generated parts
+        """
         for i in range(len(splits)-1):
             part = parents[0:, splits[i]:splits[i+1]]
             yield self.swap(part, i)

@@ -49,6 +49,17 @@ class TournamentSelection:
 
     @beartype
     def tournament_round(self, scores: NDArray) -> np.int64:
+        """Get the results of one round of the tournament
+
+        ---
+        Parameters:
+        scores: NDArray
+            The Numpy array of scores to chose from
+
+        ---
+        Returns:
+        np.int46, the index of the winning individual
+        """
         selection = scores[
                 (indexes := np.random.choice(len(scores), size=self.amount_to_take, replace=False))
             ]
@@ -95,5 +106,16 @@ class RouletteSelection:
 
     @beartype
     def roulette_wheel(self, scores: NDArray) -> np.int64:
+        """Gets the result of a single roulette spin
+
+        ---
+        Parameters:
+        scores: NDArray
+            The Numpy array of scores to chose from
+
+        ---
+        Returns:
+        np.int46, the index of the winning individual
+        """
         [value] = random.choices(scores, scores)
         return np.where(scores==value)[0][0]

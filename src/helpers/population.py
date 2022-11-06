@@ -7,7 +7,7 @@ from beartype import beartype
 @beartype
 def generate_rand_population(*, pop_size: int, dimensions: int) -> NDArray:
     """Generates a random population
-    
+
     ---
     Parameters:
     pop_size: int
@@ -25,14 +25,14 @@ def generate_rand_population(*, pop_size: int, dimensions: int) -> NDArray:
 @beartype
 def take_random_individual(population: NDArray, *, amount: int = 1) -> NDArray:
     """Takes random distinct individuals from a population
-    
+
     ---
     Parameters:
     population: NDArray[NDarray[np.int8]]
         A two-dimensional array representing the population to pull from
     amount: int
         The amount of non-repeating individuals to take
-    
+
     ---
     Returns:
     NDArray[NDArray[np.int8]]
