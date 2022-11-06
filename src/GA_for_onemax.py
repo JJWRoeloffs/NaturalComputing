@@ -14,7 +14,6 @@ You are encouraged to use a virtual environment. Install the required dependenci
 from __future__ import annotations
 
 import shutil
-import sys
 
 import numpy as np
 from nptyping import NDArray
