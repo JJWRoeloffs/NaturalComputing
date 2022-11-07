@@ -18,7 +18,7 @@ import shutil
 import numpy as np
 from nptyping import NDArray
 from beartype import beartype
-from beartype.typing import List, Callable
+from beartype.typing import Callable
 
 from helpers import generate_rand_population
 
@@ -84,9 +84,7 @@ class GeneticAlgorithm:
             population = self.select(children, scores, self.pop_size)
             if self.greedy:
                 population = self.keep_current_best(population, problem)
-            print(problem.state.current_best)
 
-        print(problem.state.evaluations)
         return problem.state.current_best
 
     @beartype
@@ -203,17 +201,18 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
     """Return a new genetic algorithem with the given amount of dimensions.
     Parameters of the algorithm can be set by writing code in this funcion"""
 
-    from algorithms import PointCrossover, UniformCrossover, BitflipMutation, TournamentSelection, Swap
+    from algorithms import UniformCrossover, BitflipMutation, TournamentSelection, Swap
 
-    recombination_algorithm = PointCrossover(
-        offspring_rate=2.0,
-        amount_of_splits=1,
+    recombination_algorithm = UniformCrossover(
+        offspring_rate=1.7,
         amount_of_parents=4,
         swap_function = Swap.random
     )
+
     mutation_algorithm = BitflipMutation(
-        rate=0.01
+        rate = 0.01
     )
+
     selection_algorithm = TournamentSelection(
         remove_chosen=True
     )
