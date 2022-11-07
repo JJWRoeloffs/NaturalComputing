@@ -31,6 +31,7 @@ class GeneticAlgorithm:
     def __init__(
             self,
             pop_size: int,
+            greedy: bool,
             recombination_algorithm: Callable,
             mutation_algorithm: Callable,
             selection_algorithm: Callable
@@ -41,6 +42,8 @@ class GeneticAlgorithm:
         ----------
         pop_size: int
             The population size to use.
+        greedy: bool
+            If the function should always include the current best in the new population
         recombination_algorithm: Callable
             The recombination algorithm to use
         mutation_algorithm: Callable
@@ -49,11 +52,12 @@ class GeneticAlgorithm:
             The selection algorithm to use
         """
 
-        self.pop_size = pop_size
+        self.pop_size  = pop_size
+        self.greedy    = greedy
 
         self.recombine = recombination_algorithm
-        self.mutate = mutation_algorithm
-        self.select = selection_algorithm
+        self.mutate    = mutation_algorithm
+        self.select    = selection_algorithm
 
     @beartype
     def __call__(self, problem: ioh.problem.Integer, budget: int) -> ioh.IntegerSolution:
@@ -78,11 +82,16 @@ class GeneticAlgorithm:
             mutated_children = self.mutate(children)
             scores = self.evaluate(mutated_children, problem)
             population = self.select(children, scores, self.pop_size)
+            if self.greedy:
+                population = self.keep_current_best(population, problem)
+            print(problem.state.current_best)
 
+        print(problem.state.evaluations)
         return problem.state.current_best
 
     @beartype
-    def should_continue(self, problem: ioh.problem.Integer, budget: int) -> bool:
+    @staticmethod
+    def should_continue(problem: ioh.problem.Integer, budget: int) -> bool:
         """Whether the algorithm should continue one more generation or not
 
         ---
@@ -95,7 +104,8 @@ class GeneticAlgorithm:
         return problem.state.evaluations < budget and not problem.state.optimum_found
 
     @beartype
-    def evaluate(self, population: NDArray, problem: ioh.problem.Integer) -> NDArray:
+    @staticmethod
+    def evaluate(population: NDArray, problem: ioh.problem.Integer) -> NDArray:
         """Maps the problem on the population, returning a static list of scores
 
         ---
@@ -110,7 +120,24 @@ class GeneticAlgorithm:
         NDArray of the scores of each individual, alligned by index
         """
         return np.asarray([problem(individual) for individual in population])
-
+    
+    @beartype
+    @staticmethod
+    def keep_current_best(population: NDArray, problem: ioh.problem.Integer) -> NDArray:
+        """Appends the current best to the population for the next round
+        
+        ---
+        Parameters:
+        population: NDArray
+            The population to append the current best to
+        problem: ioh.problem.Integer
+            The problem to find the current best from
+        
+        ---
+        Returns:
+        NDArray representing the new population
+        """
+        return np.vstack([[problem.state.current_best.x], population])
 
 @beartype
 def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, type: str = "OneMax", instance=1):
@@ -176,12 +203,13 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
     """Return a new genetic algorithem with the given amount of dimensions.
     Parameters of the algorithm can be set by writing code in this funcion"""
 
-    from algorithms import PointCrossover, BitflipMutation, TournamentSelection
+    from algorithms import PointCrossover, UniformCrossover, BitflipMutation, TournamentSelection, Swap
 
     recombination_algorithm = PointCrossover(
-        offspring_rate=1.7,
-        amount_of_splits=40,
-        amount_of_parents=4
+        offspring_rate=2.0,
+        amount_of_splits=1,
+        amount_of_parents=4,
+        swap_function = Swap.random
     )
     mutation_algorithm = BitflipMutation(
         rate=0.01
@@ -191,10 +219,11 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
     )
 
     return GeneticAlgorithm(
-            pop_size = 200,
-            recombination_algorithm = recombination_algorithm,
-            mutation_algorithm = mutation_algorithm,
-            selection_algorithm = selection_algorithm
+        pop_size = 5,
+        greedy   = True,
+        recombination_algorithm = recombination_algorithm,
+        mutation_algorithm = mutation_algorithm,
+        selection_algorithm = selection_algorithm
     )
 
 if __name__ == "__main__":

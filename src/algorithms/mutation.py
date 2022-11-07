@@ -14,9 +14,11 @@ class BitflipMutation:
         ---
         Parameters:
         rate: float [0:1]
-            The rate at which to randomly mutate 
+            The rate at which to randomly mutate any bit
         """
-        self.rate = rate
+        # Numpy doesn't have map().
+        # Instead, you define a function, vecotise it, and then apply it on the array.
+        self.flip_bits = np.vectorize(lambda x: x if (random.random() > rate) else int(not x))
 
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
@@ -31,5 +33,4 @@ class BitflipMutation:
         Returns:
         NDArray representing the offspring
         """
-        flip_bits = np.vectorize(lambda x: x if (random.random() > self.rate) else int(not x))
-        return flip_bits(population)
+        return self.flip_bits(population)

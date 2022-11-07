@@ -93,6 +93,9 @@ class UniformCrossover:
         if population.shape[0] > amount_of_groups*self.amount_of_parents:
             raise ValueError("Effective reproduction rate should be at least 1")
 
+        if self.amount_of_parents > population.shape[0]:
+            raise ValueError("Amount of parents must be smaller than population size")
+
         children_groups = self._get_uniform_children(
                 population = population,
                 amount_of_groups = amount_of_groups,
@@ -199,6 +202,12 @@ class PointCrossover:
 
         if population.shape[0] > amount_of_groups*self.amount_of_parents:
             raise ValueError("Effective reproduction rate should be at least 1")
+
+        if self.amount_of_parents > population.shape[0]:
+            raise ValueError("Amount of parents must be smaller than population size")
+
+        if self.amount_of_splits > population.shape[1]:
+            raise ValueError("Amount of splits has to be smaller than the dimensions of the individuals")
 
         children_groups = self._get_point_children(
                 population = population,
