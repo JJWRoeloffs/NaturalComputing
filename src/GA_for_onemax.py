@@ -118,19 +118,19 @@ class GeneticAlgorithm:
         NDArray of the scores of each individual, alligned by index
         """
         return np.asarray([problem(individual) for individual in population])
-    
+
     @beartype
     @staticmethod
     def keep_current_best(population: NDArray, problem: ioh.problem.Integer) -> NDArray:
         """Appends the current best to the population for the next round
-        
+
         ---
         Parameters:
         population: NDArray
             The population to append the current best to
         problem: ioh.problem.Integer
             The problem to find the current best from
-        
+
         ---
         Returns:
         NDArray representing the new population
@@ -210,7 +210,7 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
     )
 
     mutation_algorithm = BitflipMutation(
-        rate = 0.01
+        rate = 1.0
     )
 
     selection_algorithm = TournamentSelection(
@@ -230,8 +230,8 @@ if __name__ == "__main__":
     # test_algorithm(new_genetic_algorithm(), 10)
 
     # Large tests
-    # test_algorithm(new_genetic_algorithm(), 100)
-    # test_algorithm(new_genetic_algorithm(), 100, type="LeadingOnes")
+    test_algorithm(new_genetic_algorithm(), 100)
+    test_algorithm(new_genetic_algorithm(), 100, type="LeadingOnes")
 
     # If your implementation passes test_algorithm(new_genetic_algorithm(), 100)
     collect_data(new_genetic_algorithm(), 100)
