@@ -1,9 +1,9 @@
-from .recombination import UniformCrossover, PointCrossover, Swap
-from .mutation import BitflipMutation, InsertionMutation, CombinedMutation
-from .selection import TournamentSelection, RouletteSelection
+from .crossover import CrossoverAlgorithm, UniformCrossover, PointCrossover, Swap
+from .mutation import MutationAlgorithm, BitflipMutation, InsertionMutation, CombinedMutation
+from .selection import SelectionAlgorithm, TournamentSelection, RouletteSelection
 
 __all__ = (
-    "UniformCrossover", "PointCrossover", "Swap",
-    "BitflipMutation", "InsertionMutation", "CombinedMutation",
-    "TournamentSelection", "RouletteSelection"
+    "CrossoverAlgorithm", "UniformCrossover", "PointCrossover", "Swap",
+    "MutationAlgorithm", "BitflipMutation", "InsertionMutation", "CombinedMutation",
+    "SelectionAlgorithm", "TournamentSelection", "RouletteSelection"
 )

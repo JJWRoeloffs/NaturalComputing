@@ -5,9 +5,19 @@ import random
 import numpy as np
 from nptyping import NDArray
 from beartype import beartype
-from beartype.typing import List
+from beartype.typing import List, Protocol
 
-class BitflipMutation:
+class MutationAlgorithm(Protocol):
+    """The bare type of a mutation algorithm"""
+    @beartype
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+    @beartype
+    def __call__(self, population: NDArray) -> NDArray:
+        pass
+
+class BitflipMutation(MutationAlgorithm):
     @beartype
     def __init__(self, rate: float) -> None:
         """A uniform mutation algorithm
@@ -38,7 +48,7 @@ class BitflipMutation:
         flip_bits = np.vectorize(lambda x: x if (random.random() > chance) else int(not x))
         return flip_bits(population)
 
-class InsertionMutation:
+class InsertionMutation(MutationAlgorithm):
     @beartype
     def __init__(self, rate: float = 1.0, multiple_values: bool = False) -> None:
         """An insertion mutation algorithm
@@ -111,7 +121,7 @@ class InsertionMutation:
         else:
             return 1
 
-class CombinedMutation:
+class CombinedMutation(MutationAlgorithm):
     @beartype
     def __init__(self, bitflip_algorithm: BitflipMutation, insertion_algorithm: InsertionMutation) -> None:
         """A wrapper that combines Bitflip and Insertion mutation

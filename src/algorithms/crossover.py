@@ -6,9 +6,19 @@ import random
 import numpy as np
 from nptyping import NDArray
 from beartype import beartype
-from beartype.typing import List, Callable, Iterator
+from beartype.typing import List, Callable, Iterator, Protocol
 
 from helpers import take_random_individual
+
+class CrossoverAlgorithm(Protocol):
+    """The bare type of a crossover algorithm"""
+    @beartype
+    def __init__(*args, **kwargs) -> None:
+        pass
+
+    @beartype
+    def __call__(self, population: NDArray) -> NDArray:
+        pass
 
 class Swap:
     @beartype
@@ -53,7 +63,7 @@ class Swap:
         return np.roll(part, i, axis=0)
 
 
-class UniformCrossover:
+class UniformCrossover(CrossoverAlgorithm):
     @beartype
     def __init__(
             self,
@@ -157,7 +167,7 @@ class UniformCrossover:
         return child_group
 
 
-class PointCrossover:
+class PointCrossover(CrossoverAlgorithm):
     @beartype
     def __init__(
             self,

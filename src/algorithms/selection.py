@@ -4,8 +4,19 @@ import random
 import numpy as np
 from nptyping import NDArray
 from beartype import beartype
+from beartype.typing import Protocol
 
-class TournamentSelection:
+class SelectionAlgorithm(Protocol):
+    """The bare type of a selection algorithm"""
+    @beartype
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+    @beartype
+    def __call__(self, children: NDArray, scores: NDArray, result_size: int) -> NDArray:
+        pass
+
+class TournamentSelection(SelectionAlgorithm):
     @beartype
     def __init__(self, remove_chosen: bool = False, amount_to_take: int = 2) -> None:
         """A tournament selection algorithm
@@ -65,7 +76,7 @@ class TournamentSelection:
             ]
         return indexes[selection.argmax()]
 
-class RouletteSelection:
+class RouletteSelection(SelectionAlgorithm):
     @beartype
     def __init__(self, remove_chosen: bool = False) -> None:
         """A roulette selection algorithm

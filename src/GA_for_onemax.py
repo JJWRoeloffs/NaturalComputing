@@ -18,23 +18,21 @@ import shutil
 import numpy as np
 from nptyping import NDArray
 from beartype import beartype
-from beartype.typing import Callable
 
 from helpers import generate_rand_population
+from algorithms import *
 
 import ioh
 
 class GeneticAlgorithm:
-    """An implementation of the Genetic Algorithm."""
-
     @beartype
     def __init__(
             self,
             pop_size: int,
             greedy: bool,
-            recombination_algorithm: Callable,
-            mutation_algorithm: Callable,
-            selection_algorithm: Callable
+            crossover_algorithm: CrossoverAlgorithm,
+            mutation_algorithm: MutationAlgorithm,
+            selection_algorithm: SelectionAlgorithm
     ) -> None:
         """Construct a new GA object.
 
@@ -44,8 +42,8 @@ class GeneticAlgorithm:
             The population size to use.
         greedy: bool
             If the function should always include the current best in the new population
-        recombination_algorithm: Callable
-            The recombination algorithm to use
+        crossover_algorithm: Callable
+            The crossover algorithm to use
         mutation_algorithm: Callable
             The mutation algorithm to use
         selection-algorithm: Callable
@@ -55,7 +53,7 @@ class GeneticAlgorithm:
         self.pop_size  = pop_size
         self.greedy    = greedy
 
-        self.recombine = recombination_algorithm
+        self.crossover = crossover_algorithm
         self.mutate    = mutation_algorithm
         self.select    = selection_algorithm
 
@@ -78,7 +76,7 @@ class GeneticAlgorithm:
             )
 
         while self.should_continue(problem, budget):
-            children = self.recombine(population)
+            children = self.crossover(population)
             mutated_children = self.mutate(children)
             scores = self.evaluate(mutated_children, problem)
             population = self.select(children, scores, self.pop_size)
@@ -202,9 +200,7 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
     """Return a new genetic algorithem with the given amount of dimensions.
     Parameters of the algorithm can be set by writing code in this funcion"""
 
-    from algorithms import UniformCrossover, BitflipMutation, TournamentSelection, Swap
-
-    recombination_algorithm = UniformCrossover(
+    crossover_algorithm = UniformCrossover(
         offspring_rate=1.7,
         amount_of_parents=4,
         swap_function = Swap.random
@@ -221,7 +217,7 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
     return GeneticAlgorithm(
         pop_size = 5,
         greedy   = True,
-        recombination_algorithm = recombination_algorithm,
+        crossover_algorithm = crossover_algorithm,
         mutation_algorithm = mutation_algorithm,
         selection_algorithm = selection_algorithm
     )
