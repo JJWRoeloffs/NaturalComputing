@@ -14,11 +14,11 @@ class CrossoverAlgorithm(Protocol):
     """The bare type of a crossover algorithm"""
     @beartype
     def __init__(*args, **kwargs) -> None:
-        pass
+        raise NotImplementedError
 
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
-        pass
+        raise NotImplementedError
 
 class Swap:
     @beartype

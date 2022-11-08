@@ -10,11 +10,11 @@ class SelectionAlgorithm(Protocol):
     """The bare type of a selection algorithm"""
     @beartype
     def __init__(self, *args, **kwargs) -> None:
-        pass
+        raise NotImplementedError
 
     @beartype
     def __call__(self, children: NDArray, scores: NDArray, result_size: int) -> NDArray:
-        pass
+        raise NotImplementedError
 
 class TournamentSelection(SelectionAlgorithm):
     @beartype

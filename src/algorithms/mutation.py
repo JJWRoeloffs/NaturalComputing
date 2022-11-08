@@ -11,11 +11,11 @@ class MutationAlgorithm(Protocol):
     """The bare type of a mutation algorithm"""
     @beartype
     def __init__(self, *args, **kwargs) -> None:
-        pass
+        raise NotImplementedError
 
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
-        pass
+        raise NotImplementedError
 
 class BitflipMutation(MutationAlgorithm):
     @beartype

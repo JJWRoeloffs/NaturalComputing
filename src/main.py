@@ -41,4 +41,4 @@ if __name__ == "__main__":
     # test_algorithm(new_genetic_algorithm(), 100, test="LeadingOnes")
 
     # If your implementation passes test_algorithm(new_genetic_algorithm(), 100)
-    collect_data(new_genetic_algorithm(), 100)
+    collect_data(new_genetic_algorithm(), "GeneticAlgorithm", 100)
