@@ -138,21 +138,22 @@ class GeneticAlgorithm:
         return np.vstack([[problem.state.current_best.x], population])
 
 @beartype
-def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, type: str = "OneMax", instance=1):
+def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, test: str = "OneMax", instance=1):
     """A function to test if your implementation solves a OneMax problem.
 
     Parameters
     ----------
     dimension: int
         The dimension of the problem, i.e. the number of search space variables.
-
+    test: str
+        The type of problem to test on (OneMax or LeadingOnes)
     instance: int
         The instance of the problem. Trying different instances of the problem,
         can be interesting if you want to check the robustness, of your GA.
     """
 
     budget = int(dimension * 5e3)
-    problem = ioh.get_problem(type, instance, dimension, "Integer")
+    problem = ioh.get_problem(test, instance, dimension, "Integer")
     solution = genetic_algorithm(problem, budget)
 
     print("GA found solution:\n", solution)
@@ -163,7 +164,7 @@ def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, type: st
         "reach the optimum."
     )
 
-    print(f"OneMax was successfully solved in {dimension}D.\n")
+    print(f"{test} was successfully solved in {dimension}D.\n")
 
 @beartype
 def collect_data(genetic_algorithm: GeneticAlgorithm, dimension: int, nreps: int = 5):
@@ -231,7 +232,7 @@ if __name__ == "__main__":
 
     # Large tests
     test_algorithm(new_genetic_algorithm(), 100)
-    test_algorithm(new_genetic_algorithm(), 100, type="LeadingOnes")
+    test_algorithm(new_genetic_algorithm(), 100, test="LeadingOnes")
 
     # If your implementation passes test_algorithm(new_genetic_algorithm(), 100)
     collect_data(new_genetic_algorithm(), 100)

@@ -34,7 +34,7 @@ class BitflipMutation:
         """
         # Numpy doesn't have map().
         # Instead, you define a function, vecotise it, and then apply it on the array.
-        chance = self.rate/population[1]
+        chance = self.rate/population.shape[1]
         flip_bits = np.vectorize(lambda x: x if (random.random() > chance) else int(not x))
         return flip_bits(population)
 
