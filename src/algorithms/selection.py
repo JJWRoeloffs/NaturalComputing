@@ -128,5 +128,42 @@ class RouletteSelection(SelectionAlgorithm):
         Returns:
         np.int46, the index of the winning individual
         """
-        [value] = random.choices(scores, scores)
+        # Normalisation is to make sure the sum isn't negtive, which ranom.choices doesn't accpet.
+        # With LeadingOnes, there is still the 1/m chance of a 0 at first check, tough, which is sloppily dealt with.
+        weights = scores/(np.sum(scores)+1)
+        try:
+            [value] = random.choices(scores, weights)
+        except ValueError:
+            value = 0
         return np.where(scores==value)[0][0]
+
+class DeterministicSelection(SelectionAlgorithm):
+    @beartype
+    def __init__(self) -> None:
+        """A deterministic selection algorithm. The best ones always win."""
+
+    @beartype
+    def __call__(self, children: NDArray, scores: NDArray, result_size: int) -> NDArray:
+        """Roulette selection algorithm
+
+        ---
+        Parameters:
+        children: NDArray
+            Array representing the children to select from
+        scores: List[int]
+            Array representing the scores of each individual in the population
+            Each index should represent the same index in the population
+        result_size: int
+            The population size of the result
+
+        ---
+        Returns:
+        NDArray representing the new population
+        """
+        output = []
+        while len(output) < result_size:
+            winner_index = scores.argmax()
+            output.append(children[winner_index])
+            children = np.delete(children, winner_index, axis = 0)
+            scores   = np.delete(scores, winner_index, axis = 0)
+        return np.asarray(output)

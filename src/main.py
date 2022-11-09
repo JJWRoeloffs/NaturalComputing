@@ -20,9 +20,7 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
         rate = 1.0
     )
 
-    selection_algorithm = TournamentSelection(
-        remove_chosen=True
-    )
+    selection_algorithm = DeterministicSelection()
 
     return GeneticAlgorithm(
         pop_size = 5,
