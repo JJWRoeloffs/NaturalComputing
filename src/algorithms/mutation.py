@@ -3,12 +3,15 @@ from __future__ import annotations
 import random
 
 import numpy as np
+from functools import reduce
 from nptyping import NDArray
 from beartype import beartype
-from beartype.typing import List, Protocol
+from beartype.typing import List, Optional, Protocol
+
 
 class MutationAlgorithm(Protocol):
     """The bare type of a mutation algorithm"""
+
     @beartype
     def __init__(self, *args, **kwargs) -> None:
         raise NotImplementedError
@@ -16,6 +19,7 @@ class MutationAlgorithm(Protocol):
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
         raise NotImplementedError
+
 
 class BitflipMutation(MutationAlgorithm):
     @beartype
@@ -44,9 +48,12 @@ class BitflipMutation(MutationAlgorithm):
         """
         # Numpy doesn't have map().
         # Instead, you define a function, vecotise it, and then apply it on the array.
-        chance = self.rate/population.shape[1]
-        flip_bits = np.vectorize(lambda x: x if (random.random() > chance) else int(not x))
+        chance = self.rate / population.shape[1]
+        flip_bits = np.vectorize(
+            lambda x: x if (random.random() > chance) else int(not x)
+        )
         return flip_bits(population)
+
 
 class InsertionMutation(MutationAlgorithm):
     @beartype
@@ -65,7 +72,7 @@ class InsertionMutation(MutationAlgorithm):
 
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
-        """Uniform mutation algorithm on population
+        """Insertion mutation algorithm on population
 
         ---
         Parameters:
@@ -117,24 +124,74 @@ class InsertionMutation(MutationAlgorithm):
         int representing the amount of moves to do
         """
         if self.multiple_values:
-            return random.randrange(end-start)
+            return random.randrange(end - start)
         else:
             return 1
 
-class CombinedMutation(MutationAlgorithm):
+
+class SwapMutation(MutationAlgorithm):
     @beartype
-    def __init__(self, bitflip_algorithm: BitflipMutation, insertion_algorithm: InsertionMutation) -> None:
-        """A wrapper that combines Bitflip and Insertion mutation
+    def __init__(self, rate: float = 1.0) -> None:
+        """A swap mutation algorithm
 
         ---
         Parameters:
-        bitflip_algorithm: BitflipMutation
-            The bitflip algorithm to be used
-        insertion_algorithm: InsertionMutation
-            The Insertion algorithm to be used
+        rate: float [0:1]
+            The rate at which to randomly mutate any individual
         """
-        self.bitflip_algorithm = bitflip_algorithm
-        self.insertion_algorithm = insertion_algorithm
+        self.rate = rate
+
+    @beartype
+    def __call__(self, population: NDArray) -> NDArray:
+        """Swap mutation algorithm on population
+
+        ---
+        Parameters:
+        population: NDArray
+            Array representing the population
+
+        ---
+        Returns:
+        NDArray representing the offspring
+        """
+        for individual in population:
+            if random.random() > self.rate:
+                continue
+            first, second = self._get_swap_locations(dimensions=population.shape[1])
+            individual[[first, second]] = individual[[second, first]]
+
+        return population
+
+    @beartype
+    @staticmethod
+    def _get_swap_locations(dimensions: int) -> NDArray:
+        """Gets the swap locations: The two locations that are swapped with eachother
+
+        ---
+        Parameters:
+        dimensions: int
+            The amount of dimensions of the population & The range between the two numbers
+
+        ---
+        Returns:
+        Array containing the two values
+        """
+        return np.random.choice(dimensions, size=2, replace=False)
+
+
+class CombinedMutation(MutationAlgorithm):
+    @beartype
+    def __init__(self, *args: MutationAlgorithm) -> None:
+        """A wrapper that allows for combination of mutation algorithms
+
+        ---
+        Parameters:
+        args:
+            The mutation algorithms to combine
+        """
+        # The Haskell is less abstruse:
+        # \x -> foldr(args x)
+        self.mutation_algorithm = lambda x: reduce(lambda result, f: f(result), args, x)
 
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
@@ -149,5 +206,4 @@ class CombinedMutation(MutationAlgorithm):
         Returns:
         NDArray representing the offspring
         """
-        population = self.insertion_algorithm(population)
-        return self.bitflip_algorithm(population)
+        return self.mutation_algorithm(population)
