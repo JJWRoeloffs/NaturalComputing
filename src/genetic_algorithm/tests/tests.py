@@ -8,8 +8,14 @@ from algorithms import GeneticAlgorithm
 
 import ioh
 
+
 @beartype
-def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, test: str = "OneMax", instance=1):
+def test_algorithm(
+    genetic_algorithm: GeneticAlgorithm,
+    dimension: int,
+    test: str = "OneMax",
+    instance=1,
+):
     """A function to test if your implementation solves a OneMax problem.
 
     Parameters
@@ -37,8 +43,11 @@ def test_algorithm(genetic_algorithm: GeneticAlgorithm, dimension: int, test: st
 
     print(f"{test} was successfully solved in {dimension}D.\n")
 
+
 @beartype
-def collect_data(genetic_algorithm: GeneticAlgorithm, name: str, dimension: int, nreps: int = 5):
+def collect_data(
+    genetic_algorithm: GeneticAlgorithm, name: str, dimension: int, nreps: int = 5
+):
     """OneMax + LeadingOnes functions 10 instances.
 
     This function should be used to generate data, for A1.

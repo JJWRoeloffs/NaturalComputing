@@ -6,8 +6,10 @@ from nptyping import NDArray
 from beartype import beartype
 from beartype.typing import Protocol
 
+
 class SelectionAlgorithm(Protocol):
     """The bare type of a selection algorithm"""
+
     @beartype
     def __init__(self, *args, **kwargs) -> None:
         raise NotImplementedError
@@ -15,6 +17,7 @@ class SelectionAlgorithm(Protocol):
     @beartype
     def __call__(self, children: NDArray, scores: NDArray, result_size: int) -> NDArray:
         raise NotImplementedError
+
 
 class TournamentSelection(SelectionAlgorithm):
     @beartype
@@ -54,8 +57,8 @@ class TournamentSelection(SelectionAlgorithm):
             winner_index = self.tournament_round(scores)
             output.append(children[winner_index])
             if self.remove_chosen:
-                children = np.delete(children, winner_index, axis = 0)
-                scores   = np.delete(scores, winner_index, axis = 0)
+                children = np.delete(children, winner_index, axis=0)
+                scores = np.delete(scores, winner_index, axis=0)
         return np.asarray(output)
 
     @beartype
@@ -72,9 +75,14 @@ class TournamentSelection(SelectionAlgorithm):
         np.int46, the index of the winning individual
         """
         selection = scores[
-                (indexes := np.random.choice(len(scores), size=self.amount_to_take, replace=False))
-            ]
+            (
+                indexes := np.random.choice(
+                    len(scores), size=self.amount_to_take, replace=False
+                )
+            )
+        ]
         return indexes[selection.argmax()]
+
 
 class RouletteSelection(SelectionAlgorithm):
     @beartype
@@ -84,7 +92,7 @@ class RouletteSelection(SelectionAlgorithm):
         ---
         Parameters:
         rate: float [0:1]
-            The rate at which to randomly mutate 
+            The rate at which to randomly mutate
         """
         self.remove_chosen = remove_chosen
 
@@ -111,8 +119,8 @@ class RouletteSelection(SelectionAlgorithm):
             winner_index = self.roulette_wheel(scores)
             output.append(children[winner_index])
             if self.remove_chosen:
-                children = np.delete(children, winner_index, axis = 0)
-                scores   = np.delete(scores, winner_index, axis = 0)
+                children = np.delete(children, winner_index, axis=0)
+                scores = np.delete(scores, winner_index, axis=0)
         return np.asarray(output)
 
     @beartype
@@ -130,12 +138,13 @@ class RouletteSelection(SelectionAlgorithm):
         """
         # Normalisation is to make sure the sum isn't negtive, which ranom.choices doesn't accpet.
         # With LeadingOnes, there is still the 1/m chance of a 0 at first check, tough, which is sloppily dealt with.
-        weights = scores/(np.sum(scores)+1)
+        weights = scores / (np.sum(scores) + 1)
         try:
             [value] = random.choices(scores, weights)
         except ValueError:
             value = 0
-        return np.where(scores==value)[0][0]
+        return np.where(scores == value)[0][0]
+
 
 class DeterministicSelection(SelectionAlgorithm):
     @beartype
@@ -164,6 +173,6 @@ class DeterministicSelection(SelectionAlgorithm):
         while len(output) < result_size:
             winner_index = scores.argmax()
             output.append(children[winner_index])
-            children = np.delete(children, winner_index, axis = 0)
-            scores   = np.delete(scores, winner_index, axis = 0)
+            children = np.delete(children, winner_index, axis=0)
+            scores = np.delete(scores, winner_index, axis=0)
         return np.asarray(output)

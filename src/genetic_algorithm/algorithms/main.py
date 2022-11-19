@@ -11,15 +11,16 @@ from .selection import SelectionAlgorithm
 
 import ioh
 
+
 class GeneticAlgorithm:
     @beartype
     def __init__(
-            self,
-            pop_size: int,
-            greedy: bool,
-            crossover_algorithm: CrossoverAlgorithm,
-            mutation_algorithm: MutationAlgorithm,
-            selection_algorithm: SelectionAlgorithm
+        self,
+        pop_size: int,
+        greedy: bool,
+        crossover_algorithm: CrossoverAlgorithm,
+        mutation_algorithm: MutationAlgorithm,
+        selection_algorithm: SelectionAlgorithm,
     ) -> None:
         """Construct a new GA object.
 
@@ -37,15 +38,17 @@ class GeneticAlgorithm:
             The selection algorithm to use
         """
 
-        self.pop_size  = pop_size
-        self.greedy    = greedy
+        self.pop_size = pop_size
+        self.greedy = greedy
 
         self.crossover = crossover_algorithm
-        self.mutate    = mutation_algorithm
-        self.select    = selection_algorithm
+        self.mutate = mutation_algorithm
+        self.select = selection_algorithm
 
     @beartype
-    def __call__(self, problem: ioh.problem.Integer, budget: int) -> ioh.IntegerSolution:
+    def __call__(
+        self, problem: ioh.problem.Integer, budget: int
+    ) -> ioh.IntegerSolution:
         """Run the GA on a given problem instance.
 
         Parameters
@@ -54,13 +57,12 @@ class GeneticAlgorithm:
             An integer problem, from the ioh package. This version of the GA
             should only work on binary/discrete search spaces.
         budget: int
-            The amount of times the GA is allowed to call the problem 
+            The amount of times the GA is allowed to call the problem
         """
 
         population = generate_rand_population(
-                pop_size=self.pop_size,
-                dimensions=problem.meta_data.n_variables
-            )
+            pop_size=self.pop_size, dimensions=problem.meta_data.n_variables
+        )
 
         while self.should_continue(problem, budget):
             children = self.crossover(population)

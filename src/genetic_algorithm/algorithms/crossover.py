@@ -10,8 +10,10 @@ from beartype.typing import List, Callable, Iterator, Protocol
 
 from helpers import take_random_individual
 
+
 class CrossoverAlgorithm(Protocol):
     """The bare type of a crossover algorithm"""
+
     @beartype
     def __init__(*args, **kwargs) -> None:
         raise NotImplementedError
@@ -19,6 +21,7 @@ class CrossoverAlgorithm(Protocol):
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
         raise NotImplementedError
+
 
 class Swap:
     @beartype
@@ -66,12 +69,12 @@ class Swap:
 class UniformCrossover(CrossoverAlgorithm):
     @beartype
     def __init__(
-            self,
-            *,
-            amount_of_parents: int = 2,
-            offspring_rate: float = 1.0,
-            swap_function: Callable = Swap.roll
-        ) -> None:
+        self,
+        *,
+        amount_of_parents: int = 2,
+        offspring_rate: float = 1.0,
+        swap_function: Callable = Swap.roll,
+    ) -> None:
         """A uniform recombination algorithm
 
         ---
@@ -98,28 +101,26 @@ class UniformCrossover(CrossoverAlgorithm):
         Returns:
         NDArray representing the offspring
         """
-        amount_of_groups = math.ceil((population.shape[0]/self.amount_of_parents)*self.offspring_rate)
+        amount_of_groups = math.ceil(
+            (population.shape[0] / self.amount_of_parents) * self.offspring_rate
+        )
 
-        if population.shape[0] > amount_of_groups*self.amount_of_parents:
+        if population.shape[0] > amount_of_groups * self.amount_of_parents:
             raise ValueError("Effective reproduction rate should be at least 1")
 
         if self.amount_of_parents > population.shape[0]:
             raise ValueError("Amount of parents must be smaller than population size")
 
         children_groups = self._get_uniform_children(
-                population = population,
-                amount_of_groups = amount_of_groups,
-                amount_per_group = self.amount_of_parents
-            )
+            population=population,
+            amount_of_groups=amount_of_groups,
+            amount_per_group=self.amount_of_parents,
+        )
         return np.vstack(list(children_groups))
 
     @beartype
     def _get_uniform_children(
-        self,
-        *,
-        population: NDArray,
-        amount_of_groups: int,
-        amount_per_group: int
+        self, *, population: NDArray, amount_of_groups: int, amount_per_group: int
     ) -> Iterator[NDArray]:
         """Get uniformly-crossed-over children from population
 
@@ -142,7 +143,9 @@ class UniformCrossover(CrossoverAlgorithm):
             yield self._get_uniform_child_group(parents=parents, chances=chances)
 
     @beartype
-    def _get_uniform_child_group(self, *, parents: NDArray, chances: NDArray) -> NDArray:
+    def _get_uniform_child_group(
+        self, *, parents: NDArray, chances: NDArray
+    ) -> NDArray:
         """Get Uniformly-crossed-over child group from population
         Each part will be swapped/randomised according to self.swap
         NOTE: This algorithm is slow, and can do with improving
@@ -161,7 +164,9 @@ class UniformCrossover(CrossoverAlgorithm):
         NDArray representing the new child group
         """
         child_group = np.copy(parents)
-        for i in range(parents.shape[1]): #Inefficient: There should be a way without looping over the dimensions in python.
+        for i in range(
+            parents.shape[1]
+        ):  # Inefficient: There should be a way without looping over the dimensions in python.
             if chances[i] < 0.5:
                 child_group[:, i] = self.swap(parents[:, i])
         return child_group
@@ -170,13 +175,13 @@ class UniformCrossover(CrossoverAlgorithm):
 class PointCrossover(CrossoverAlgorithm):
     @beartype
     def __init__(
-            self,
-            *,
-            amount_of_parents: int = 2,
-            amount_of_splits: int = 1,
-            offspring_rate: float = 1.0,
-            swap_function: Callable = Swap.roll
-        ) -> None:
+        self,
+        *,
+        amount_of_parents: int = 2,
+        amount_of_splits: int = 1,
+        offspring_rate: float = 1.0,
+        swap_function: Callable = Swap.roll,
+    ) -> None:
         """A uniform recombination algorithm
 
         ---
@@ -208,24 +213,27 @@ class PointCrossover(CrossoverAlgorithm):
         Returns:
         NDArray representing the offspring
         """
-        amount_of_groups = math.ceil((population.shape[0]/self.amount_of_parents)*self.offspring_rate)
+        amount_of_groups = math.ceil(
+            (population.shape[0] / self.amount_of_parents) * self.offspring_rate
+        )
 
-        if population.shape[0] > amount_of_groups*self.amount_of_parents:
+        if population.shape[0] > amount_of_groups * self.amount_of_parents:
             raise ValueError("Effective reproduction rate should be at least 1")
 
         if self.amount_of_parents > population.shape[0]:
             raise ValueError("Amount of parents must be smaller than population size")
 
         if self.amount_of_splits > population.shape[1]:
-            raise ValueError("Amount of splits has to be smaller than the dimensions of the individuals")
+            raise ValueError(
+                "Amount of splits has to be smaller than the dimensions of the individuals"
+            )
 
         children_groups = self._get_point_children(
-                population = population,
-                amount_of_groups = amount_of_groups,
-                amount_per_group = self.amount_of_parents
-            )
+            population=population,
+            amount_of_groups=amount_of_groups,
+            amount_per_group=self.amount_of_parents,
+        )
         return np.vstack(list(children_groups))
-
 
     @beartype
     def _get_point_children(
@@ -234,7 +242,7 @@ class PointCrossover(CrossoverAlgorithm):
         population: NDArray,
         amount_of_groups: int,
         amount_per_group: int,
-        ) -> Iterator[NDArray]:
+    ) -> Iterator[NDArray]:
         """Get point-crossed-over children from population
 
         ---
@@ -252,7 +260,7 @@ class PointCrossover(CrossoverAlgorithm):
         """
         for _ in range(amount_of_groups):
             parents = take_random_individual(population, amount=amount_per_group)
-            splits = self._get_random_ranges(dimensions = parents.shape[1])
+            splits = self._get_random_ranges(dimensions=parents.shape[1])
             parts = list(self._get_split_parts(splits, parents))
             yield np.hstack(parts)
 
@@ -273,10 +281,14 @@ class PointCrossover(CrossoverAlgorithm):
             Example: for one split at index 6 for 10 dimensions, the returned value would be [0,6,10]
             representing range [0:6] and [6:10]
         """
-        return sorted(random.sample(range(1, dimensions), self.amount_of_splits) + [0, dimensions])
+        return sorted(
+            random.sample(range(1, dimensions), self.amount_of_splits) + [0, dimensions]
+        )
 
     @beartype
-    def _get_split_parts(self, splits: List[int], parents: NDArray) -> Iterator[NDArray]:
+    def _get_split_parts(
+        self, splits: List[int], parents: NDArray
+    ) -> Iterator[NDArray]:
         """Get Itterator over parts, representing the individual sections from a group of parents
         Each part will be swapped/randomised according to self.swap
 
@@ -293,6 +305,6 @@ class PointCrossover(CrossoverAlgorithm):
         Returns:
         Itterator over the generated parts
         """
-        for i in range(len(splits)-1):
-            part = parents[0:, splits[i]:splits[i+1]]
+        for i in range(len(splits) - 1):
+            part = parents[0:, splits[i] : splits[i + 1]]
             yield self.swap(part, i)

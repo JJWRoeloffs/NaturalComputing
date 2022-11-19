@@ -5,30 +5,30 @@ from beartype import beartype
 from algorithms import *
 from tests import test_algorithm, collect_data
 
+
 @beartype
 def new_genetic_algorithm() -> GeneticAlgorithm:
     """Return a new genetic algorithem with the given amount of dimensions.
     Parameters of the algorithm can be set by writing code in this funcion"""
 
     crossover_algorithm = UniformCrossover(
-        offspring_rate=1.7,
-        amount_of_parents=4,
-        swap_function = Swap.random
+        offspring_rate=1.7, amount_of_parents=4, swap_function=Swap.random
     )
 
-    mutation_algorithm = BitflipMutation(
-        rate = 1.0
-    )
+    swap_algorithm = SwapMutation(rate=0.5)
+    bitflip_algorithm = BitflipMutation(rate=0.5)
+    mutation_algorithm = CombinedMutation(bitflip_algorithm, swap_algorithm)
 
     selection_algorithm = DeterministicSelection()
 
     return GeneticAlgorithm(
-        pop_size = 5,
-        greedy   = True,
-        crossover_algorithm = crossover_algorithm,
-        mutation_algorithm = mutation_algorithm,
-        selection_algorithm = selection_algorithm
+        pop_size=5,
+        greedy=True,
+        crossover_algorithm=crossover_algorithm,
+        mutation_algorithm=mutation_algorithm,
+        selection_algorithm=selection_algorithm,
     )
+
 
 if __name__ == "__main__":
     # Simple test for development purpose
