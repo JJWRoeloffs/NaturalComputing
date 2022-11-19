@@ -7,16 +7,6 @@ import ioh
 from genetic_algorithm import GeneticAlgorithm
 
 
-class CellularAutomata:
-    """Skeleton CA, you should implement this."""
-
-    def __init__(self, rule_number: int):
-        """Intialize the cellular automaton with a given rule number"""
-
-    def __call__(self, c0: typing.List[int], t: int) -> typing.List[int]:
-        """Evaluate for T timesteps. Return Ct for a given C0."""
-
-
 def make_objective_function(ct, rule, t, similarity_method):
     """Create a CA objective function."""
 
