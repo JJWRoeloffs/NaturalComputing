@@ -31,7 +31,7 @@ class RuleSet:
     def get_ruleset(rule: int, k: int = 2, r: int = 1) -> List[np.int8]:
         length = k ** (2 * r + 1)
         rulestring = np.base_repr(rule, k).zfill(length)
-        return [np.int8(x) for x in rulestring]
+        return list(reversed([np.int8(x) for x in rulestring]))
 
     @beartype
     @classmethod
@@ -39,7 +39,7 @@ class RuleSet:
         ruleset = cls.get_ruleset(rule, k, r)
 
         rule_dict = {}
-        for i, result in enumerate(reversed(ruleset)):
+        for i, result in enumerate(ruleset):
             pattern = np.base_repr(i, k).zfill(2 * r + 1)
             rule_dict[pattern] = result
         return rule_dict
