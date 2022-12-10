@@ -1,11 +1,25 @@
+import csv
 import shutil
 import random
 
 import ioh
+from beartype import beartype
+from beartype.typing import List, Dict
 
 from genetic_algorithm import GeneticAlgorithm
-from .cellular_automata import make_objective_function
+from cellular_automata import make_objective_function
 
+INPUTFILE = "./input/ca_input.csv"
+
+@beartype
+def read_inputfile(inputfile: str) -> List[Dict]:
+    with open(inputfile, encoding = "utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        return list(reader)
+
+def parse_input(data: List[Dict]) -> List[Dict]:
+    """Get a new dict where all the values are the old ones evaluated as python code."""
+    return [{k: eval(v) for k, v in item.items()} for item in data]
 
 def example(nreps=10):
     """An example of wrapping a objective function in ioh and collecting data
@@ -43,4 +57,4 @@ def example(nreps=10):
 
 
 if __name__ == "__main__":
-    example()
+    input = parse_input((read_inputfile(INPUTFILE)))
