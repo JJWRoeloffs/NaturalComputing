@@ -1,35 +1,43 @@
-import beartype
+from __future__ import annotations
+
+import numpy as np
+from nptyping import NDArray
+from beartype import beartype
 from beartype.typing import List
 
 from .automata import CellularAutomata
+from .similarity import SimilarityMethod
 
-def make_objective_function(ct, rule, t, similarity_method):
-    """Create a CA objective function."""
 
-    if similarity_method == 1:
+class AutomataObjectiveFunction:
+    @beartype
+    def __init__(
+        self, ca: CellularAutomata, similarity: SimilarityMethod, ct: NDArray, t: int
+    ) -> None:
+        """Automata objective function: calculate the quality if the input
 
-        def similarity(ct: List[int], ct_prime: List[int]) -> float:
-            """You should implement this"""
+        ---
+        Parameters:
+        ca: CellularAutomata
+            The Cellular Automata to use for the evaulation
+        similarity: SimilarityMethod
+            The similarity method to use for the evaulation
+        ct: NDArray
+            the expected result
+        t: int
+            the amount of steps to take to get to the expected result
+        """
+        self.similarity = similarity
+        self.ca = ca
+        self.ct = ct
+        self.t = t
 
-            return random.uniform(0, 100)
-
-    else:
-
-        def similarity(ct: List[int], ct_prime: List[int]) -> float:
-            """You should implement this"""
-
-            return random.normalvariate(0, 10)
-
-    def objective_function(c0_prime: List[int]) -> float:
-        """Skeleton objective function.
-
-        You should implement a method  which computes a similarity measure
-        between c0_prime a suggested by your GA, with the true c0 state
-        for the ct state given in the sup. material.
-
+    @beartype
+    def __call__(self, c0_prime: NDArray) -> float:
+        """
+        ---
         Parameters
-        ----------
-        c0_prime: list[int] | np.ndarray
+        c0_prime: NDArray
             A suggested c0 state
 
         Returns
@@ -37,9 +45,5 @@ def make_objective_function(ct, rule, t, similarity_method):
         float
             The similarity of ct_prime to the true ct state of the CA
         """
-
-        ca = CellularAutomata(rule)
-        ct_prime = ca(c0_prime, t)
-        return similarity(ct, ct_prime)
-
-    return objective_function
+        ct_prime = self.ca(c0_prime, self.t)
+        return similarity(self.ct, ct_prime)

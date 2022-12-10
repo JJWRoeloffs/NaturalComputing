@@ -1,8 +1,8 @@
 from .automata import CellularAutomata, RuleSet
-from .objective_function import make_objective_function
+from .objective_function import AutomataObjectiveFunction
 
 __all__ = (
     "CellularAutomata",
     "RuleSet",
-    "make_objective_function",
+    "AutomataObjectiveFunction",
 )
