@@ -8,7 +8,7 @@ from nptyping import NDArray
 from beartype import beartype
 from beartype.typing import List, Callable, Iterator, Protocol
 
-from helpers import take_random_individual
+from genetic_algorithm.helpers import take_random_individual
 
 
 class CrossoverAlgorithm(Protocol):

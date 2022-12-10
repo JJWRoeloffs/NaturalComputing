@@ -4,7 +4,7 @@ import numpy as np
 from nptyping import NDArray
 from beartype import beartype
 
-from helpers import generate_rand_population
+from genetic_algorithm.helpers import generate_rand_population
 from .crossover import CrossoverAlgorithm
 from .mutation import MutationAlgorithm
 from .selection import SelectionAlgorithm

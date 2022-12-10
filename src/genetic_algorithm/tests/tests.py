@@ -4,7 +4,7 @@ import shutil
 
 from beartype import beartype
 
-from algorithms import GeneticAlgorithm
+from genetic_algorithm.algorithms import GeneticAlgorithm
 
 import ioh
 

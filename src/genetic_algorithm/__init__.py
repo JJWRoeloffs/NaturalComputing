@@ -1,6 +1,3 @@
-from algorithms import GeneticAlgorithm
-import algorithms as algorithms
-import helpers as helpers
-import tests as tests
+from .algorithms import GeneticAlgorithm
 
-__all__ = ("GeneticAlgorithm", "algorithms", "helpers", "tests")
+__all__ = ("GeneticAlgorithm")
