@@ -65,4 +65,5 @@ class AutomataObjectiveFunction:
         ---
         Returns
         bool"""
-        return len(c0_prime) == EqualitySimilarity()(self.ct, c0_prime)
+        ct_prime = self.ca(c0_prime, self.t)
+        return all([(x == y) for x, y in zip(self.ct, ct_prime)])
