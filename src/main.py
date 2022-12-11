@@ -1,60 +1,55 @@
-import csv
-import shutil
-import random
-
-import ioh
 from beartype import beartype
-from beartype.typing import List, Dict
 
-from genetic_algorithm import GeneticAlgorithm
-from cellular_automata import make_objective_function
+from cellular_automata import AutomataObjectiveFunction
+from genetic_algorithm.algorithms import *
+from cellular_automata.similarity import *
+from tests import get_input, objective_function_from_input, collect_data_cellular
 
 INPUTFILE = "./input/ca_input.csv"
 
+
 @beartype
-def read_inputfile(inputfile: str) -> List[Dict]:
-    with open(inputfile, encoding = "utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        return list(reader)
+def new_genetic_algorithm() -> GeneticAlgorithm:
+    """Return a new genetic algorithem with the given amount of dimensions.
+    Parameters of the algorithm can be set by writing code in this funcion"""
 
-def parse_input(data: List[Dict]) -> List[Dict]:
-    """Get a new dict where all the values are the old ones evaluated as python code."""
-    return [{k: eval(v) for k, v in item.items()} for item in data]
-
-def example(nreps=10):
-    """An example of wrapping a objective function in ioh and collecting data
-    for inputting in the analyzer."""
-
-    ct, rule, t = None, None, None  # Given by the sup. material
-
-    # Create an objective function
-    objective_function = make_objective_function(ct, rule, t, 1)
-
-    # Wrap objective_function as an ioh problem
-    problem = ioh.wrap_problem(
-        objective_function,
-        name="objective_function_ca_1",  # Give an informative name
-        dimension=10,  # Should be the size of ct
-        problem_type="Integer",
-        optimization_type=ioh.OptimizationType.MAX,
-        lb=0,
-        ub=1,  # 1 for 2d, 2 for 3d
+    crossover_algorithm = UniformCrossover(
+        offspring_rate=1.7, amount_of_parents=4, swap_function=Swap.random
     )
-    # Attach a logger to the problem
-    logger = ioh.logger.Analyzer()
-    problem.attach_logger(logger)
 
-    # run your algoritm on the problem
-    for _ in range(nreps):
-        algorithm = GeneticAlgorithm(10)
-        algorithm(problem)
-        problem.reset()
+    swap_algorithm = SwapMutation(rate=0.5)
+    bitflip_algorithm = BitflipMutation(rate=0.5)
+    mutation_algorithm = CombinedMutation(bitflip_algorithm, swap_algorithm)
 
-    logger.close()
+    selection_algorithm = DeterministicSelection()
 
-    shutil.make_archive("ioh_data", "zip", "ioh_data")
-    shutil.rmtree("ioh_data")
+    return GeneticAlgorithm(
+        pop_size=50,
+        greedy=False,
+        crossover_algorithm=crossover_algorithm,
+        mutation_algorithm=mutation_algorithm,
+        selection_algorithm=selection_algorithm,
+    )
+
+
+@beartype
+def new_objective_function() -> AutomataObjectiveFunction:
+    """Returns a new Automata Objective Function with the given data.
+    Parameters can be set by writing code in this function"""
+
+    similarity = EqualitySimilarity()
+    input_data = get_input(INPUTFILE)
+    return objective_function_from_input(input_data[1], similarity)
+
+
+def main():
+    collect_data_cellular(
+        budget=10000,
+        genetic_algorithm=new_genetic_algorithm(),
+        objective_function=new_objective_function(),
+        name="Hello There",
+    )
 
 
 if __name__ == "__main__":
-    input = parse_input((read_inputfile(INPUTFILE)))
+    main()

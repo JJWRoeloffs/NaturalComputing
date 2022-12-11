@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 from nptyping import NDArray
 from beartype import beartype
-from beartype.typing import List
+from beartype.typing import List, Callable
 
 from .automata import CellularAutomata
 from .similarity import SimilarityMethod
@@ -12,7 +12,12 @@ from .similarity import SimilarityMethod
 class AutomataObjectiveFunction:
     @beartype
     def __init__(
-        self, ca: CellularAutomata, similarity: SimilarityMethod, ct: NDArray, t: int
+        self,
+        ca: CellularAutomata,
+        similarity: SimilarityMethod,
+        ct: NDArray,
+        t: int,
+        k: int,
     ) -> None:
         """Automata objective function: calculate the quality if the input
 
@@ -31,19 +36,20 @@ class AutomataObjectiveFunction:
         self.ca = ca
         self.ct = ct
         self.t = t
+        self.k = k
 
     @beartype
-    def __call__(self, c0_prime: NDArray) -> float:
+    def get_function(self) -> Callable:
         """
-        ---
-        Parameters
-        c0_prime: NDArray
-            A suggested c0 state
+        Return a "clean" objective function that can be properly mapped to a C++ type.
 
         Returns
         -------
-        float
-            The similarity of ct_prime to the true ct state of the CA
+        Callable
+            The objective function to use.
         """
-        ct_prime = self.ca(c0_prime, self.t)
-        return similarity(self.ct, ct_prime)
+        def objective_function(c0_prime: NDArray) -> float:
+            ct_prime = self.ca(c0_prime, self.t)
+            return self.similarity(self.ct, ct_prime)
+
+        return objective_function

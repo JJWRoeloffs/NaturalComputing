@@ -117,7 +117,6 @@ def collect_data_cellular(
         dimension=len(objective_function.ct),
         problem_type="Integer",
         optimization_type=ioh.OptimizationType.MAX,
-        # calculate_objective=objective_function.best,
         lb=0,
         ub=objective_function.k - 1,
     )
