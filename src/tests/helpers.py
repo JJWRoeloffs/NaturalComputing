@@ -4,7 +4,7 @@ import csv
 
 import numpy as np
 from beartype import beartype
-from beartype.typing import List, Dict
+from beartype.typing import List, Dict, Callable
 
 from cellular_automata import (
     AutomataObjectiveFunction,
@@ -12,11 +12,13 @@ from cellular_automata import (
     CellularAutomata,
 )
 
+import ioh
+
 
 @beartype
 def new_standard_problem(
-    dimension: int,
     test: str = "OneMax",
+    dimension: int = 100,
     instance=1,
 ) -> IOHProblem:
     return ioh.get_problem(test, instance, dimension, "Integer")
@@ -55,4 +57,19 @@ def objective_function_from_input(
         ct=np.asarray(item["CT"]),
         t=item["T"],
         k=item["k"],
+    )
+
+
+@beartype
+def wrap_objective_function(
+    objective_function: AutomataObjectiveFunction, name: str = "ObjectiveFunction"
+) -> Callable:
+    return ioh.wrap_problem(
+        objective_function.get_function(),
+        name=name,
+        dimension=len(objective_function.ct),
+        problem_type="Integer",
+        optimization_type=ioh.OptimizationType.MAX,
+        lb=0,
+        ub=objective_function.k - 1,
     )

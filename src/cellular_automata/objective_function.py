@@ -6,7 +6,7 @@ from beartype import beartype
 from beartype.typing import List, Callable
 
 from .automata import CellularAutomata
-from .similarity import SimilarityMethod, EqualitySimilarity
+from .similarity import SimilarityMethod
 
 
 class AutomataObjectiveFunction:

@@ -1,3 +1,3 @@
 from .algorithms import GeneticAlgorithm
 
-__all__ = ("GeneticAlgorithm")
+__all__ = "GeneticAlgorithm"

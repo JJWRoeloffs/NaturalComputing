@@ -3,7 +3,12 @@ from .tests import (
     collect_data_onemax_leadingones,
     collect_data_cellular,
 )
-from .helpers import new_standard_problem, get_input, objective_function_from_input
+from .helpers import (
+    new_standard_problem,
+    get_input,
+    objective_function_from_input,
+    wrap_objective_function,
+)
 
 __all__ = (
     "test_algorithm",
@@ -12,4 +17,5 @@ __all__ = (
     "new_standard_problem",
     "get_input",
     "objective_function_from_input",
+    "wrap_objective_function",
 )

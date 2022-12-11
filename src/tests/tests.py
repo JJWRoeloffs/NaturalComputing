@@ -3,8 +3,9 @@ from __future__ import annotations
 import shutil
 
 from beartype import beartype
-from beartype.typing import Optional
+from beartype.typing import Union, Callable
 
+from .helpers import new_standard_problem, wrap_objective_function
 from genetic_algorithm.algorithms import GeneticAlgorithm
 from cellular_automata import (
     AutomataObjectiveFunction,
@@ -19,7 +20,8 @@ import ioh
 def test_algorithm(
     budget: int,
     genetic_algorithm: GeneticAlgorithm,
-    problem: Callable = None,
+    problem: Union[str, Callable] = "OneMax",
+    dimension: int = 100,
 ):
     """A function to test if your implementation solves a OneMax problem.
 
@@ -31,13 +33,12 @@ def test_algorithm(
         The type of problem to test on (OneMax or LeadingOnes)
     """
 
-    if problem is None:
-        problem = ioh.get_problem(problem, instance, dimension, "Integer")
+    if isinstance(problem, str):
+        problem = new_standard_problem(problem, dimension)
     solution = genetic_algorithm(problem, budget)
 
     print("GA found solution:\n", solution)
 
-    assert problem.state.optimum_found, "The optimum has not been reached."
     assert problem.state.evaluations <= budget, (
         "The GA has spent more than the allowed number of evaluations to "
         "reach the optimum."
@@ -89,8 +90,7 @@ def collect_data_onemax_leadingones(
 def collect_data_cellular(
     budget: int,
     genetic_algorithm: GeneticAlgorithm,
-    objective_function: AutomataObjectiveFunction,
-    name: str = "Cellular_0",
+    problem: Callable,
     nreps: int = 9,
 ):
     """CellularAutomata evaluation
@@ -103,23 +103,13 @@ def collect_data_cellular(
         The budget
     genetic_algorithm: GeneticAlgorithm
         The algorithm to test
-    objective_function: AutomataObjectiveFunction
-        The objective function to use
+    problem: Callable
+        The ioh problem function to use
     name: str
         The name to use for the algorithm
     nreps: int
         The number of repetitions for each problem instance.
     """
-
-    problem = ioh.wrap_problem(
-        objective_function.get_function(),
-        name=name,
-        dimension=len(objective_function.ct),
-        problem_type="Integer",
-        optimization_type=ioh.OptimizationType.MAX,
-        lb=0,
-        ub=objective_function.k - 1,
-    )
 
     logger = ioh.logger.Analyzer()
     problem.attach_logger(logger)

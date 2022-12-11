@@ -42,8 +42,8 @@ class EqualitySimilarity(SimilarityMethod):
 
 class ValueRespectingSimilarity(SimilarityMethod):
     @beartype
-    def __init__(self, dimensions: int):
-        self.similarity = lambda x, y: dimensions - ((x - y) % dimensions)
+    def __init__(self, k: int):
+        self.similarity = lambda x, y: k - ((x - y) % k)
 
     @beartype
     def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
@@ -59,4 +59,4 @@ class ValueRespectingSimilarity(SimilarityMethod):
         float
             The Similarity
         """
-        return float(sum([similarity(x, y) for x, y in zip(ct, ct_prime)]))
+        return float(sum([self.similarity(x, y) for x, y in zip(ct, ct_prime)]))

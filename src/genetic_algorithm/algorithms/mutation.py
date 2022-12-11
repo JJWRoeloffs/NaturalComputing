@@ -23,7 +23,7 @@ class MutationAlgorithm(Protocol):
 
 class BitflipMutation(MutationAlgorithm):
     @beartype
-    def __init__(self, rate: float, lb: int = 0, ub: int = 2) -> None:
+    def __init__(self, rate: float, lb: int = 0, ub: int = 1) -> None:
         """A uniform mutation algorithm
 
         ---
@@ -194,7 +194,7 @@ class CombinedMutation(MutationAlgorithm):
             The mutation algorithms to combine
         """
         # The Haskell is less abstruse:
-        # \x -> foldr(args x)
+        # \x -> foldr args x
         self.mutation_algorithm = lambda x: reduce(lambda result, f: f(result), args, x)
 
     @beartype
