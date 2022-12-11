@@ -44,7 +44,9 @@ def test_algorithm(
         "reach the optimum."
     )
 
-    print(f"{test} was successfully solved in {dimension}D.\n")
+    print(
+        f"{problem.meta_data.name} was successfully solved with {problem.state.evaluations} evaluations.\n"
+    )
 
 
 @beartype
