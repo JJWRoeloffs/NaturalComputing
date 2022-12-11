@@ -65,7 +65,10 @@ class GeneticAlgorithm:
         """
 
         population = generate_rand_population(
-            pop_size=self.pop_size, dimensions=problem.meta_data.n_variables
+            pop_size=self.pop_size,
+            dimensions=problem.meta_data.n_variables,
+            lb=int(problem.bounds.lb.min()),
+            ub=int(problem.bounds.ub.max()),
         )
 
         while self.should_continue(problem, budget):

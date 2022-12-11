@@ -6,7 +6,9 @@ from beartype import beartype
 
 
 @beartype
-def generate_rand_population(*, pop_size: int, dimensions: int) -> NDArray:
+def generate_rand_population(
+    *, pop_size: int, dimensions: int, lb: int = 0, ub: int = 1
+) -> NDArray:
     """Generates a random population
 
     ---
@@ -21,7 +23,9 @@ def generate_rand_population(*, pop_size: int, dimensions: int) -> NDArray:
     NDArray[NDarray[np.int8]]
         A two-dimensional array with 8-bit ints of random values 1 or 0
     """
-    return np.random.randint(2, size=(pop_size, dimensions), dtype=np.int8)
+    return np.random.randint(
+        low=lb, high=ub + 1, size=(pop_size, dimensions), dtype=np.int8
+    )
 
 
 @beartype

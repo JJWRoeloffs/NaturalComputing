@@ -23,7 +23,7 @@ class MutationAlgorithm(Protocol):
 
 class BitflipMutation(MutationAlgorithm):
     @beartype
-    def __init__(self, rate: float) -> None:
+    def __init__(self, rate: float, lb: int = 0, ub: int = 2) -> None:
         """A uniform mutation algorithm
 
         ---
@@ -32,6 +32,8 @@ class BitflipMutation(MutationAlgorithm):
             The rate at which to randomly mutate any bit
         """
         self.rate = rate
+        self.lb = lb
+        self.ub = ub
 
     @beartype
     def __call__(self, population: NDArray) -> NDArray:
@@ -50,7 +52,9 @@ class BitflipMutation(MutationAlgorithm):
         # Instead, you define a function, vecotise it, and then apply it on the array.
         chance = self.rate / population.shape[1]
         flip_bits = np.vectorize(
-            lambda x: x if (random.random() > chance) else int(not x)
+            lambda x: x
+            if (random.random() > chance)
+            else np.random.randint(low=self.lb, high=self.ub + 1, dtype=np.int8)
         )
         return flip_bits(population)
 
