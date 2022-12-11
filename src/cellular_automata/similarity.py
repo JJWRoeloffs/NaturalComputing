@@ -4,6 +4,8 @@ from nptyping import NDArray
 from beartype import beartype
 from beartype.typing import Protocol
 
+from .helpers import damerau_levenshtein
+
 
 class SimilarityMethod(Protocol):
     """The Bare type of a Similarity Method"""
@@ -60,3 +62,25 @@ class ValueRespectingSimilarity(SimilarityMethod):
             The Similarity
         """
         return float(sum([self.similarity(x, y) for x, y in zip(ct, ct_prime)]))
+
+
+class DamerauLevenshteinSimilarity(SimilarityMethod):
+    @beartype
+    def __init__(*args, **kwargs):
+        pass
+
+    @beartype
+    def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
+        """A similarity function that returns the amount of overlapping inputs
+        ---
+        Parameters:
+        ct: NDArray
+            The perfect output
+        ct_prime: NDArray
+            The suggested output
+        ---
+        Returns:
+        float
+            The Similarity
+        """
+        return float(damerau_levenshtein(ct, ct_prime))
