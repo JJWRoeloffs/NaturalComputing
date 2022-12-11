@@ -3,18 +3,23 @@ from __future__ import annotations
 import shutil
 
 from beartype import beartype
+from beartype.typing import Optional
 
 from genetic_algorithm.algorithms import GeneticAlgorithm
+from cellular_automata import (
+    AutomataObjectiveFunction,
+    SimilarityMethod,
+    CellularAutomata,
+)
 
 import ioh
 
 
 @beartype
 def test_algorithm(
+    budget: int,
     genetic_algorithm: GeneticAlgorithm,
-    dimension: int,
-    test: str = "OneMax",
-    instance=1,
+    problem: Callable = None,
 ):
     """A function to test if your implementation solves a OneMax problem.
 
@@ -22,15 +27,12 @@ def test_algorithm(
     ----------
     dimension: int
         The dimension of the problem, i.e. the number of search space variables.
-    test: str
+    problem: str
         The type of problem to test on (OneMax or LeadingOnes)
-    instance: int
-        The instance of the problem. Trying different instances of the problem,
-        can be interesting if you want to check the robustness, of your GA.
     """
 
-    budget = int(dimension * 5e3)
-    problem = ioh.get_problem(test, instance, dimension, "Integer")
+    if problem is None:
+        problem = ioh.get_problem(problem, instance, dimension, "Integer")
     solution = genetic_algorithm(problem, budget)
 
     print("GA found solution:\n", solution)
@@ -45,8 +47,11 @@ def test_algorithm(
 
 
 @beartype
-def collect_data(
-    genetic_algorithm: GeneticAlgorithm, name: str, dimension: int, nreps: int = 5
+def collect_data_onemax_leadingones(
+    genetic_algorithm: GeneticAlgorithm,
+    name: str,
+    dimension: int,
+    nreps: int = 5,
 ):
     """OneMax + LeadingOnes functions 10 instances.
 
@@ -75,6 +80,55 @@ def collect_data(
         for _ in range(nreps):
             genetic_algorithm(problem, budget)
             problem.reset()
+    logger.close()
+
+    shutil.make_archive("ioh_data", "zip", "ioh_data")
+    shutil.rmtree("ioh_data")
+
+
+def collect_data_cellular(
+    budget: int,
+    genetic_algorithm: GeneticAlgorithm,
+    objective_function: AutomataObjectiveFunction,
+    name: str = "Cellular_0",
+    nreps: int = 9,
+):
+    """CellularAutomata evaluation
+
+    This function should be used to generate data, for A2.
+
+    Parameters
+    ----------
+    budget: int
+        The budget
+    genetic_algorithm: GeneticAlgorithm
+        The algorithm to test
+    objective_function: AutomataObjectiveFunction
+        The objective function to use
+    name: str
+        The name to use for the algorithm
+    nreps: int
+        The number of repetitions for each problem instance.
+    """
+
+    problem = ioh.wrap_problem(
+        objective_function.get_function(),
+        name=name,
+        dimension=len(objective_function.ct),
+        problem_type="Integer",
+        optimization_type=ioh.OptimizationType.MAX,
+        # calculate_objective=objective_function.best,
+        lb=0,
+        ub=objective_function.k - 1,
+    )
+
+    logger = ioh.logger.Analyzer()
+    problem.attach_logger(logger)
+
+    for _ in range(nreps):
+        genetic_algorithm(problem, budget)
+        problem.reset()
+
     logger.close()
 
     shutil.make_archive("ioh_data", "zip", "ioh_data")
