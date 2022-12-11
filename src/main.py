@@ -9,7 +9,9 @@ INPUTFILE = "./input/ca_input.csv"
 
 
 @beartype
-def new_genetic_algorithm() -> GeneticAlgorithm:
+def new_genetic_algorithm(
+    objective_function: AutomataObjectiveFunction,
+) -> GeneticAlgorithm:
     """Return a new genetic algorithem with the given amount of dimensions.
     Parameters of the algorithm can be set by writing code in this funcion"""
 
@@ -25,10 +27,11 @@ def new_genetic_algorithm() -> GeneticAlgorithm:
 
     return GeneticAlgorithm(
         pop_size=50,
-        greedy=False,
+        greedy=True,
         crossover_algorithm=crossover_algorithm,
         mutation_algorithm=mutation_algorithm,
         selection_algorithm=selection_algorithm,
+        objective_function=objective_function,
     )
 
 
@@ -43,10 +46,13 @@ def new_objective_function() -> AutomataObjectiveFunction:
 
 
 def main():
+    objective_function = new_objective_function()
+    genetic_algorithm = new_genetic_algorithm(objective_function)
+
     collect_data_cellular(
         budget=10000,
-        genetic_algorithm=new_genetic_algorithm(),
-        objective_function=new_objective_function(),
+        objective_function=objective_function,
+        genetic_algorithm=genetic_algorithm,
         name="Hello There",
     )
 

@@ -23,7 +23,8 @@ class EqualitySimilarity(SimilarityMethod):
         pass
 
     @beartype
-    def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
+    @staticmethod
+    def __call__(ct: NDArray, ct_prime: NDArray) -> float:
         """A similarity function that returns the amount of overlapping inputs
         ---
         Parameters:

@@ -3,7 +3,9 @@ from __future__ import annotations
 import numpy as np
 from nptyping import NDArray
 from beartype import beartype
+from beartype.typing import Optional
 
+from cellular_automata import AutomataObjectiveFunction
 from genetic_algorithm.helpers import generate_rand_population
 from .crossover import CrossoverAlgorithm
 from .mutation import MutationAlgorithm
@@ -21,6 +23,7 @@ class GeneticAlgorithm:
         crossover_algorithm: CrossoverAlgorithm,
         mutation_algorithm: MutationAlgorithm,
         selection_algorithm: SelectionAlgorithm,
+        objective_function: Optional[AutomataObjectiveFunction] = None,
     ) -> None:
         """Construct a new GA object.
 
@@ -44,6 +47,7 @@ class GeneticAlgorithm:
         self.crossover = crossover_algorithm
         self.mutate = mutation_algorithm
         self.select = selection_algorithm
+        self.objective_function = objective_function
 
     @beartype
     def __call__(
@@ -75,8 +79,7 @@ class GeneticAlgorithm:
         return problem.state.current_best
 
     @beartype
-    @staticmethod
-    def should_continue(problem: ioh.problem.Integer, budget: int) -> bool:
+    def should_continue(self, problem: ioh.problem.Integer, budget: int) -> bool:
         """Whether the algorithm should continue one more generation or not
 
         ---
@@ -86,7 +89,15 @@ class GeneticAlgorithm:
         budget: int
             The budget for the problem
         """
-        return problem.state.evaluations < budget and not problem.state.optimum_found
+        if self.objective_function is None:
+            return (
+                problem.state.evaluations < budget and not problem.state.optimum_found
+            )
+        else:
+            return (
+                problem.state.evaluations < budget
+                and not self.objective_function.is_optimal(problem.state.current_best.x)
+            )
 
     @beartype
     @staticmethod
