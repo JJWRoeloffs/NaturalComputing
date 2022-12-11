@@ -1,31 +1,24 @@
 from __future__ import annotations
 
+from difflib import SequenceMatcher
+
 from nptyping import NDArray
 from beartype import beartype
 from beartype.typing import Protocol
 
-from .helpers import damerau_levenshtein
+from .helpers import damerau_levenshtein, damerau_levenshtein_imported
 
 
 class SimilarityMethod(Protocol):
     """The Bare type of a Similarity Method"""
 
     @beartype
-    def __init__(*args, **kwargs) -> None:
-        raise NotImplementedError
-
-    @beartype
     def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
         raise NotImplementedError
 
 
-class EqualitySimilarity(SimilarityMethod):
+class HammingSimilarity(SimilarityMethod):
     @beartype
-    def __init__(self) -> None:
-        pass
-
-    @beartype
-    @staticmethod
     def __call__(ct: NDArray, ct_prime: NDArray) -> float:
         """A similarity function that returns the amount of overlapping inputs
         ---
@@ -42,14 +35,11 @@ class EqualitySimilarity(SimilarityMethod):
         return float(sum([int(x == y) for x, y in zip(ct, ct_prime)]))
 
 
-class ValueRespectingSimilarity(SimilarityMethod):
-    @beartype
-    def __init__(self, k: int):
-        self.similarity = lambda x, y: k - ((x - y) % k)
-
+class LeeSimilarity(SimilarityMethod):
     @beartype
     def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
-        """A similarity function that returns the amount of overlapping inputs
+        """A similarity function that returns the amount of overlapping inputs,
+        whilst respecting the integer differences
         ---
         Parameters:
         ct: NDArray
@@ -61,17 +51,13 @@ class ValueRespectingSimilarity(SimilarityMethod):
         float
             The Similarity
         """
-        return float(sum([self.similarity(x, y) for x, y in zip(ct, ct_prime)]))
+        return float(sum([abs(x - y) for x, y in zip(ct, ct_prime)]))
 
 
 class DamerauLevenshteinSimilarity(SimilarityMethod):
     @beartype
-    def __init__(*args, **kwargs):
-        pass
-
-    @beartype
     def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
-        """A similarity function that returns the amount of overlapping inputs
+        """A similarity function that returns Damerau Levenshtein Distance
         ---
         Parameters:
         ct: NDArray
@@ -83,4 +69,40 @@ class DamerauLevenshteinSimilarity(SimilarityMethod):
         float
             The Similarity
         """
-        return float(damerau_levenshtein(ct, ct_prime))
+        return float(len(ct) - damerau_levenshtein_imported(ct, ct_prime))
+
+
+class LCSSimilarity(SimilarityMethod):
+    @beartype
+    def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
+        """A similarity function that returns the length of the longest common subsequence
+        ---
+        Parameters:
+        ct: NDArray
+            The perfect output
+        ct_prime: NDArray
+            The suggested output
+        ---
+        Returns:
+        float
+            The Similarity
+        """
+        return float(SequenceMatcher(None, ct, ct_prime).find_longest_match().size)
+
+
+class GestaltSimilarity(SimilarityMethod):
+    @beartype
+    def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
+        """A similarity function that returns the Gestalt Similarity
+        ---
+        Parameters:
+        ct: NDArray
+            The perfect output
+        ct_prime: NDArray
+            The suggested output
+        ---
+        Returns:
+        float
+            The Similarity
+        """
+        return float(SequenceMatcher(None, ct, ct_prime).ratio())
