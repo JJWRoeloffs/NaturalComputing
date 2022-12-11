@@ -41,7 +41,7 @@ def parse_arguments() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace = parse_arguments()
+    args: argparse.Namespace = parse_arguments()
 
     stage = StageRenderer.get_simple_init()
     rule_set = RuleSet(args.wolfraam, args.k, args.radius)

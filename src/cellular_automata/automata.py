@@ -13,16 +13,17 @@ class CellularAutomata:
         self.rule_set = RuleSet(rule, k, r)
 
     @beartype
-    def __call__(self, stage: List[np.int8], t: int) -> List[np.int8]:
+    def __call__(self, stage: NDArray, t: int) -> NDArray:
         """Evaluate for T timesteps. Return Ct for a given C0."""
         for _ in range(t):
-            stage = rule_set(stage)
+            stage = self.rule_set(stage)
         return stage
 
 
 class RuleSet:
     @beartype
     def __init__(self, rule: int, k: int = 2, r: int = 1):
+        """A Wolfraam Cellular Automata Ruleset with the given perameters"""
         self.rule = rule
         self.k = k
         self.r = r
