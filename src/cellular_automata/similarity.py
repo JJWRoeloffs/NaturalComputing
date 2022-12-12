@@ -105,4 +105,4 @@ class GestaltSimilarity(SimilarityMethod):
         float
             The Similarity
         """
-        return float(SequenceMatcher(None, ct, ct_prime).ratio())
+        return float(len(ct) * SequenceMatcher(None, ct, ct_prime).ratio())
