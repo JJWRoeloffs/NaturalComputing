@@ -17,7 +17,6 @@ class AutomataObjectiveFunction:
         similarity: SimilarityMethod,
         ct: NDArray,
         t: int,
-        k: int,
     ) -> None:
         """Automata objective function: calculate the quality if the input
 
@@ -36,7 +35,6 @@ class AutomataObjectiveFunction:
         self.ca = ca
         self.ct = ct
         self.t = t
-        self.k = k
 
     @beartype
     def get_function(self) -> Callable:

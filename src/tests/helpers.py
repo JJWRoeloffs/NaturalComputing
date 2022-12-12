@@ -56,7 +56,6 @@ def objective_function_from_input(
         similarity=similarity,
         ct=np.asarray(item["CT"]),
         t=item["T"],
-        k=item["k"],
     )
 
 
