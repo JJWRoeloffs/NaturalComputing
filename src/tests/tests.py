@@ -94,6 +94,7 @@ def collect_data_cellular(
     genetic_algorithm: GeneticAlgorithm,
     problem: Callable,
     nreps: int = 9,
+    name: str = "GeneticAlgorithm"
 ):
     """CellularAutomata evaluation
 
@@ -113,7 +114,7 @@ def collect_data_cellular(
         The number of repetitions for each problem instance.
     """
 
-    logger = ioh.logger.Analyzer()
+    logger = ioh.logger.Analyzer(algorithm_name=name)
     problem.attach_logger(logger)
 
     for _ in range(nreps):
