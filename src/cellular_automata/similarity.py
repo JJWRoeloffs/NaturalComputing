@@ -19,7 +19,7 @@ class SimilarityMethod(Protocol):
 
 class HammingSimilarity(SimilarityMethod):
     @beartype
-    def __call__(ct: NDArray, ct_prime: NDArray) -> float:
+    def __call__(self, ct: NDArray, ct_prime: NDArray) -> float:
         """A similarity function that returns the amount of overlapping inputs
         ---
         Parameters:
@@ -105,4 +105,4 @@ class GestaltSimilarity(SimilarityMethod):
         float
             The Similarity
         """
-        return float(len(ct) * SequenceMatcher(None, ct, ct_prime).ratio())
+        return float(2* len(ct) * SequenceMatcher(None, ct, ct_prime).ratio())
