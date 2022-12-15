@@ -31,7 +31,10 @@ class BitflipMutation(MutationAlgorithm):
         rate: float [0:1]
             The rate at which to randomly mutate any bit
         """
-        self.rate = rate
+        self.rate = rate / (
+            # Correct for randomly guessing the same value.
+            (1 - (1 / ((ub + 1) - lb)))
+        )
         self.lb = lb
         self.ub = ub
 
