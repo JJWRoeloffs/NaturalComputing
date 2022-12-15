@@ -70,5 +70,5 @@ def wrap_objective_function(
         problem_type="Integer",
         optimization_type=ioh.OptimizationType.MAX,
         lb=0,
-        ub=objective_function.k - 1,
+        ub=objective_function.ca.rule_set.k - 1,
     )
